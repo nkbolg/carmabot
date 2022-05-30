@@ -12,9 +12,11 @@ class Handlers:
         self.carma = collections.defaultdict(int)
 
     async def start_handler(self, message: types.Message):
-        reply_text = "Привет! Я считаю карму в чатах.\n" \
-                     "Я умею реагировать на следующие сообщения:\n\n" \
-                     "{}".format('\n'.join(self.target_phrases))
+        reply_text = (
+            "Привет! Я считаю карму в чатах.\n"
+            "Я умею реагировать на следующие сообщения:\n\n"
+            "{}".format("\n".join(self.target_phrases))
+        )
         await message.reply(reply_text, reply=False)
 
     async def chat_reply_handler(self, message: types.Message):
