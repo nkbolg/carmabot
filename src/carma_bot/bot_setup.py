@@ -29,12 +29,12 @@ def setup_handlers(dispatcher: aiogram.Dispatcher):
 
     dispatcher.register_message_handler(handlers.statistics_handler,
         filters.Text(startswith='/stats'),
-        chat_type=types.ChatType.GROUP
+        chat_type=[types.ChatType.GROUP, types.ChatType.SUPERGROUP]
     )
 
     dispatcher.register_message_handler(
         handlers.chat_reply_handler,
         filters.Text(equals=target, ignore_case=True),
         is_reply=True,
-        chat_type=types.ChatType.GROUP,
+        chat_type=[types.ChatType.GROUP, types.ChatType.SUPERGROUP],
     )
