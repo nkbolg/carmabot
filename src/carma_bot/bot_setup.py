@@ -1,6 +1,8 @@
 import asyncio
 
 import aiogram
+from aiogram import types
+from aiogram.dispatcher import filters
 
 from carma_bot import config
 from carma_bot.handlers import Handlers
@@ -19,20 +21,19 @@ def create_dispatcher(conf: config.Config):
 
 def setup_handlers(dispatcher: aiogram.Dispatcher, conf: config.Config):
     """Привязка обработчиков к командам получаемым ботом"""
-    handlers = Handlers(dispatcher.bot)
+    target = ["спс",
+              "спасибо",
+              "благодарю",
+              "thank you",
+              "thanks"]
 
-    dispatcher.register_message_handler(handlers.start_handler, commands=["start"])
+    handlers = Handlers(dispatcher.bot, target)
 
-    dispatcher.register_message_handler(handlers.any_handler)
+    dispatcher.register_message_handler(handlers.start_handler, filters.CommandStart())
 
-    # dispatcher.register_message_handler(
-    #     handlers.details_handler, regexp=f"^{MainButtons.DETAILS_SERVICE_BTN_TEXT}$"
-    # )
-    #
-    # main_regex = f"^({'|'.join(MainButtons.get_texts()[1:])})$"
-    # dispatcher.register_message_handler(handlers.create_chat_handler, regexp=main_regex)
-    #
-    # details_regex = f"^{'|'.join(DetailsMenuButtons.get_texts())}$"
-    # dispatcher.register_message_handler(
-    #     handlers.show_details_handler, regexp=details_regex
-    # )
+    dispatcher.register_message_handler(
+        handlers.chat_reply_handler,
+        filters.Text(equals=target, ignore_case=True),
+        is_reply=True,
+        chat_type=types.ChatType.GROUP,
+    )
