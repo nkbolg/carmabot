@@ -1,4 +1,6 @@
+import datetime
 import logging
+import shelve
 from dataclasses import dataclass
 
 import aiogram.utils.exceptions
@@ -18,11 +20,60 @@ class User:
         return f"{self.username} ({self.carma})"
 
 
+class CarmaStorage:
+    def __init__(self):
+        self.filename = 'carma_storage'
+        self.db = shelve.DbfilenameShelf(self.filename, writeback=True)
+        if not self.db:
+            self.db['all'] = {}
+            self.db['last_month'] = {}
+            self.db['current_month'] = datetime.datetime.utcnow().month
+            self.db.sync()
+
+    def inc(self, key: tuple[int, int]):
+        self._flush_month(sync=False)
+
+        self.db['all'][key] += 1
+        self.db['last_month'][key] += 1
+        self.db.sync()
+
+    def conditional_emplace(self, key: tuple[int, int], name: str):
+        self._flush_month(sync=False)
+
+        if key not in self.db['all']:
+            self.db['all'][key] = User(name)
+            self.db['last_month'][key] = User(name)
+
+        self.db.sync()
+
+    def __getitem__(self, key: tuple[int, int]):
+        return self.db['all'][key]
+
+    def formatted_list_all(self, chat_id: int) -> str:
+        sorted_list = sorted(self.db['all'].values(), key=lambda x: x.carma, reverse=True)
+        return "\n".join(map(str, sorted_list))
+
+    def formatted_list_month(self, chat_id: int):
+        sorted_list = sorted(self.db['last_month'].values(), key=lambda x: x.carma, reverse=True)
+        return "\n".join(map(str, sorted_list))
+
+    def _flush_month(self, sync):
+        now_month = datetime.datetime.utcnow().month
+
+        if now_month != self.db['current_month']:
+            assert now_month > self.db['current_month']
+            self.db['last_month'] = {}
+            self.db['current_month'] = now_month
+
+        if sync:
+            self.db.sync()
+
+
 class Handlers:
     def __init__(self, bot: aiogram.Bot, target_phrases):
         self.bot = bot
         self.target_phrases = target_phrases
-        self.carma = {}
+        self.carma = CarmaStorage()
 
     async def start_handler(self, message: types.Message):
         reply_text = (
@@ -33,26 +84,30 @@ class Handlers:
         await message.reply(reply_text, reply=False)
 
     async def statistics_handler(self, message: types.Message):
-        values = sorted(self.carma.values(), key=lambda x: x.carma, reverse=True)
-        await message.reply("\n".join(map(str, values)))
+        if message.get_command().endswith('month'):
+            await message.reply(self.carma.formatted_list_month(message.chat.id))
+            return
+        await message.reply(self.carma.formatted_list_all(message.chat.id))
 
     async def chat_reply_handler(self, message: types.Message):
         benefitiar_id = message.reply_to_message.from_user.id
         benefitiar_name = message.reply_to_message.from_user.full_name
         blesser_id = message.from_user.id
         blesser_name = message.from_user.full_name
+        chat_id = message.chat.id
+        benefitiar_key = chat_id, benefitiar_id
+        blesser_key = chat_id, blesser_id
         if benefitiar_id == blesser_id:
             await message.reply(
                 "Полиция кармы подозревает вас в попытке накрутки😎\nНе надо так."
             )
             return
-        if benefitiar_id not in self.carma:
-            self.carma[benefitiar_id] = User(benefitiar_name)
-        if blesser_id not in self.carma:
-            self.carma[blesser_id] = User(blesser_name)
-        self.carma[benefitiar_id] += 1
+
+        self.carma.conditional_emplace(key=benefitiar_key, name=benefitiar_name)
+        self.carma.conditional_emplace(key=blesser_key, name=blesser_name)
+        self.carma.inc((chat_id, benefitiar_id))
         reply_template = (
-            f"{self.carma[blesser_id]} увеличил карму {self.carma[benefitiar_id]}"
+            f"{self.carma[blesser_key]} увеличил карму {self.carma[benefitiar_key]}"
         )
         if benefitiar_id == self.bot.id:
             reply_template += "\n\nХорошее слово и боту приятно❤"
