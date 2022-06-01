@@ -21,7 +21,7 @@ def create_dispatcher(conf: config.Config):
 
 def setup_handlers(dispatcher: aiogram.Dispatcher):
     """Привязка обработчиков к командам получаемым ботом"""
-    target = ["спс", "спасибо", "благодарю", "thank you", "thanks", "от души", "по братски"]
+    target = ["спс", "спасибо", "благодарю", "thank you", "thanks", "от души", "по братски", "по-братски"]
 
     handlers = Handlers(dispatcher.bot, target)
 
