@@ -1,24 +1,13 @@
 from unittest import TestCase
 
-from yadro_management.handlers import ChatCounter
+from carma_bot.handlers import Handlers
 
 
 class TestChatCounter(TestCase):
     def test_counter_simple(self):
-        cnt = ChatCounter()
-        self.assertEqual(cnt.counter, 0)
-        with cnt as counter:
-            self.assertEqual(counter, 1)
-            self.assertEqual(cnt.counter, 1)
-        self.assertEqual(cnt.counter, 1)
-
-    def test_exception(self):
-        cnt = ChatCounter()
-        try:
-            with cnt as _:
-                raise RuntimeError('test exception')
-        except RuntimeError:
-            pass
-        finally:
-            self.assertEqual(cnt.counter, 0)
-
+        target = ["спс", "спасибо", "благодарю", "thank you", "thanks", "от души", "по братски"]
+        self.assertTrue(Handlers._acceptable(target, "Спасибо!"))
+        self.assertTrue(Handlers._acceptable(target, "Спасибо !"))
+        self.assertTrue(Handlers._acceptable(target, "от души."))
+        self.assertTrue(Handlers._acceptable(target, "от души )"))
+        self.assertTrue(Handlers._acceptable(target, "🕴от души🕴"))

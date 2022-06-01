@@ -91,7 +91,15 @@ class Handlers:
             return
         await message.reply(self.carma.formatted_list_all(message.chat.id))
 
+    @staticmethod
+    def _acceptable(target_phrases, text: str):
+        res = ''.join((filter(lambda x: x.isalpha() or x == ' ', text.lower())))
+        return res.strip() in target_phrases
+
     async def chat_reply_handler(self, message: types.Message):
+        if not self._acceptable(self.target_phrases, message.text):
+            return
+
         benefitiar_id = message.reply_to_message.from_user.id
         benefitiar_name = message.reply_to_message.from_user.full_name
         blesser_id = message.from_user.id
