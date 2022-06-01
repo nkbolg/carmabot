@@ -42,6 +42,8 @@ class CarmaStorage:
 
         if key not in self.db['all']:
             self.db['all'][key] = User(name)
+
+        if key not in self.db['last_month']:
             self.db['last_month'][key] = User(name)
 
         self.db.sync()
