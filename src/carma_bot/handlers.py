@@ -165,7 +165,7 @@ class Handlers:
         chat_id = message.chat.id
         if benefitiar_id == blesser_id:
             await message.reply(
-                "Полиция кармы подозревает вас в попытке накрутки😎\nНе надо так."
+                "Полиция кармы подозревает вас в попытке накрутки😎\n\nНе надо так."
             )
             return
 
@@ -220,11 +220,11 @@ class Handlers:
             )
             return
 
-        reply_template = f"{self.carma[blesser_user_key]} увеличил карму:\n"
+        reply_template = f"{self.carma[blesser_user_key]} увеличил карму:\n\n"
 
         for key in benefitiar_users:
             self.carma.inc(key)
-            reply_template += f"{self.carma[key]}"
+            reply_template += f"{self.carma[key]}\n"
 
         logging.info(message)
         await message.reply(reply_template)
