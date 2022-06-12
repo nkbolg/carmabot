@@ -28,3 +28,8 @@ class TestCarmaStorage(TestCase):
         self.cs.conditional_emplace(chat_id=2, username='vasya', name='Вася', user_id=10500)
         self.cs.inc(key=(10500, 2))
         self.assertEqual(self.cs[(10500, 2)].carma, 1)
+
+    def test_change_same_obj(self):
+        key = self.cs.conditional_emplace(chat_id=0, username='qwe')
+        self.cs.inc(key)
+        self.assertEqual(self.cs[key].carma, 1)

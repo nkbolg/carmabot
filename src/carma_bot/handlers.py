@@ -21,6 +21,9 @@ class User:
     def __str__(self):
         return f"{self.name if self.name else self.username} ({self.carma})"
 
+    def __hash__(self):
+        return hash(self.username or "" + self.name or "")
+
 
 class CarmaStorage:
     def __init__(self, filename):
@@ -87,13 +90,13 @@ class CarmaStorage:
 
         self.db.sync()
 
-        return key, user_all
+        return key
 
     def __getitem__(self, key: Union[tuple[str, int], tuple[int, int]]):
         return self.db["all"][key]
 
     def formatted_list_all(self, chat_id: int) -> str:
-        filtered = (v for k, v in self.db["all"].items() if k[1] == chat_id)
+        filtered = list(set(v for k, v in self.db["all"].items() if k[1] == chat_id))
         sorted_list = sorted(filtered, key=lambda x: x.carma, reverse=True)
         return "\n".join(map(str, sorted_list))
 
@@ -132,18 +135,21 @@ class Handlers:
         if message.get_command().endswith("month"):
             await message.reply(self.carma.formatted_list_month(message.chat.id))
             return
-        await message.reply(self.carma.formatted_list_all(message.chat.id))
+        await message.reply(self.carma.formatted_list_all(message.chat.id) or "Статистики пока нет")
 
     @staticmethod
     def _acceptable(target_phrases, text: str):
-        res = "".join((filter(lambda x: x.isalpha() or x == " ", text.lower())))
-        return res.strip() in target_phrases
+        lowered = text.lower()
+        for phr in target_phrases:
+            if phr in lowered:
+                return True
+        return False
 
     @staticmethod
     def parse_mentions(text: str) -> list[str]:
         if "@" not in text:
             return []
-        return list(filter(lambda x: x.startswith("@"), text.split()))
+        return [x[1:] for x in text.split() if x.startswith("@")]
 
     async def chat_reply_handler(self, message: types.Message):
         if not self._acceptable(self.target_phrases, message.text):
@@ -155,7 +161,7 @@ class Handlers:
         benefitiar_username = message.reply_to_message.from_user.username
         blesser_id = message.from_user.id
         blesser_name = message.from_user.full_name
-        blesser_username = message.reply_to_message.from_user.username
+        blesser_username = message.from_user.username
         chat_id = message.chat.id
         if benefitiar_id == blesser_id:
             await message.reply(
@@ -163,20 +169,20 @@ class Handlers:
             )
             return
 
-        _, benefitiar_user = self.carma.conditional_emplace(
+        benefitiar_user_key = self.carma.conditional_emplace(
             chat_id=chat_id,
             username=benefitiar_username,
             user_id=benefitiar_id,
             name=benefitiar_name,
         )
-        _, blesser_user = self.carma.conditional_emplace(
+        blesser_user_key = self.carma.conditional_emplace(
             chat_id=chat_id,
             username=blesser_username,
             user_id=blesser_id,
             name=blesser_name,
         )
         self.carma.inc((benefitiar_id, chat_id))
-        reply_template = f"{blesser_user} увеличил карму {benefitiar_user}"
+        reply_template = f"{self.carma[blesser_user_key]} увеличил карму {self.carma[benefitiar_user_key]}"
         if benefitiar_id == self.bot.id:
             reply_template += "\n\nХорошее слово и боту приятно❤"
         logging.info(message)
@@ -186,12 +192,17 @@ class Handlers:
         if not (mentioned_users := self.parse_mentions(message.text)):
             logging.debug("No mentions")
             return
+
+        if not self._acceptable(self.target_phrases, message.text):
+            logging.debug("Message not acceptable")
+            return
+
         blesser_id = message.from_user.id
         blesser_name = message.from_user.full_name
         chat_id = message.chat.id
-        blesser_username = message.reply_to_message.from_user.username
+        blesser_username = message.from_user.username
 
-        blesser_user_key, blesser_user = self.carma.conditional_emplace(
+        blesser_user_key = self.carma.conditional_emplace(
             chat_id=chat_id,
             username=blesser_username,
             user_id=blesser_id,
@@ -209,11 +220,11 @@ class Handlers:
             )
             return
 
-        reply_template = f"{blesser_user} увеличил карму:\n"
+        reply_template = f"{self.carma[blesser_user_key]} увеличил карму:\n"
 
-        for key, user in benefitiar_users:
+        for key in benefitiar_users:
             self.carma.inc(key)
-            reply_template += f"{user}"
+            reply_template += f"{self.carma[key]}"
 
         logging.info(message)
         await message.reply(reply_template)
