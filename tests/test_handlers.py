@@ -11,3 +11,4 @@ class TestChatCounter(TestCase):
         self.assertTrue(Handlers._acceptable(target, "от души."))
         self.assertTrue(Handlers._acceptable(target, "от души )"))
         self.assertTrue(Handlers._acceptable(target, "🕴от души🕴"))
+

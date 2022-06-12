@@ -21,19 +21,34 @@ def create_dispatcher(conf: config.Config):
 
 def setup_handlers(dispatcher: aiogram.Dispatcher):
     """Привязка обработчиков к командам получаемым ботом"""
-    target = ["спс", "спасибо", "благодарю", "thank you", "thanks", "от души", "по братски", "побратски"]
+    target = [
+        "спс",
+        "спасибо",
+        "благодарю",
+        "thank you",
+        "thanks",
+        "от души",
+        "по братски",
+        "побратски",
+    ]
 
     handlers = Handlers(dispatcher.bot, target)
 
     dispatcher.register_message_handler(handlers.start_handler, filters.CommandStart())
 
-    dispatcher.register_message_handler(handlers.statistics_handler,
-        filters.Text(startswith='/stats'),
-        chat_type=[types.ChatType.GROUP, types.ChatType.SUPERGROUP]
+    dispatcher.register_message_handler(
+        handlers.statistics_handler,
+        filters.Text(startswith="/stats"),
+        chat_type=[types.ChatType.GROUP, types.ChatType.SUPERGROUP],
     )
 
     dispatcher.register_message_handler(
         handlers.chat_reply_handler,
         is_reply=True,
+        chat_type=[types.ChatType.GROUP, types.ChatType.SUPERGROUP],
+    )
+
+    dispatcher.register_message_handler(
+        handlers.chat_mentions_handler,
         chat_type=[types.ChatType.GROUP, types.ChatType.SUPERGROUP],
     )
