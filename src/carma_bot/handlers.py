@@ -149,7 +149,7 @@ class Handlers:
     def parse_mentions(text: str) -> list[str]:
         if "@" not in text:
             return []
-        return [x[1:] for x in text.split() if x.startswith("@")]
+        return [x[1:].rstrip() for xs in text.split() for x in xs.split(',') if x.startswith("@")]
 
     async def chat_reply_handler(self, message: types.Message):
         if not self._acceptable(self.target_phrases, message.text):
