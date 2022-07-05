@@ -98,12 +98,12 @@ class CarmaStorage:
     def formatted_list_all(self, chat_id: int) -> str:
         filtered = list(set(v for k, v in self.db["all"].items() if k[1] == chat_id and v.carma != 0))
         sorted_list = sorted(filtered, key=lambda x: x.carma, reverse=True)
-        return "\n".join(map(str, sorted_list))
+        return "\n".join(map(str, sorted_list)) or "Пока тут пусто"
 
     def formatted_list_month(self, chat_id: int):
         filtered = list(set(v for k, v in self.db["last_month"].items() if k[1] == chat_id and v.carma != 0))
         sorted_list = sorted(filtered, key=lambda x: x.carma, reverse=True)
-        return "\n".join(map(str, sorted_list))
+        return "\n".join(map(str, sorted_list)) or "Пока тут пусто"
 
     def _flush_month(self, sync):
         now_month = datetime.datetime.utcnow().month
@@ -135,7 +135,7 @@ class Handlers:
         if message.get_command().endswith("month"):
             await message.reply(self.carma.formatted_list_month(message.chat.id))
             return
-        await message.reply(self.carma.formatted_list_all(message.chat.id) or "Статистики пока нет")
+        await message.reply(self.carma.formatted_list_all(message.chat.id))
 
     @staticmethod
     def _acceptable(target_phrases, text: str):
