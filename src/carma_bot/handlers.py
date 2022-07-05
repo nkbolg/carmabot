@@ -96,12 +96,12 @@ class CarmaStorage:
         return self.db["all"][key]
 
     def formatted_list_all(self, chat_id: int) -> str:
-        filtered = list(set(v for k, v in self.db["all"].items() if k[1] == chat_id))
+        filtered = list(set(v for k, v in self.db["all"].items() if k[1] == chat_id and v.carma != 0))
         sorted_list = sorted(filtered, key=lambda x: x.carma, reverse=True)
         return "\n".join(map(str, sorted_list))
 
     def formatted_list_month(self, chat_id: int):
-        filtered = (v for k, v in self.db["last_month"].items() if k[1] == chat_id)
+        filtered = list(set(v for k, v in self.db["last_month"].items() if k[1] == chat_id and v.carma != 0))
         sorted_list = sorted(filtered, key=lambda x: x.carma, reverse=True)
         return "\n".join(map(str, sorted_list))
 
