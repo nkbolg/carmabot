@@ -44,18 +44,18 @@ class CarmaStorage:
 
     @staticmethod
     def _inner_emplace(
-        key: Union[tuple[str, int], tuple[int, int]], user: User, data_dict
+            key: Union[tuple[str, int], tuple[int, int]], user: User, data_dict
     ):
         if key not in data_dict:
             data_dict[key] = user
 
     def conditional_emplace(
-        self,
-        *,
-        chat_id: int,
-        name: str = None,
-        user_id: int = None,
-        username: str = None,
+            self,
+            *,
+            chat_id: int,
+            name: str = None,
+            user_id: int = None,
+            username: str = None,
     ):
         self._flush_month(sync=False)
 
@@ -163,6 +163,15 @@ class Handlers:
         blesser_name = message.from_user.full_name
         blesser_username = message.from_user.username
         chat_id = message.chat.id
+
+        now_month = datetime.datetime.utcnow().month
+        if now_month != self.carma.db["current_month"]:
+            kir_chat = -1001672737552
+            month_msg = self.carma.formatted_list_month(kir_chat)
+            if len(month_msg) > 4000:
+                month_msg = month_msg[:4000] + '...'
+            await self.bot.send_message(kir_chat, f"Статистика за месяц:\n\n{month_msg}")
+
         if benefitiar_id == blesser_id:
             await message.reply(
                 "Полиция кармы подозревает вас в попытке накрутки😎\n\nНе надо так."
@@ -202,6 +211,14 @@ class Handlers:
         chat_id = message.chat.id
         blesser_username = message.from_user.username
 
+        now_month = datetime.datetime.utcnow().month
+        if now_month != self.carma.db["current_month"]:
+            kir_chat = -1001672737552
+            month_msg = self.carma.formatted_list_month(kir_chat)
+            if len(month_msg) > 4000:
+                month_msg = month_msg[:4000] + '...'
+            await self.bot.send_message(kir_chat, f"Статистика за месяц:\n\n{month_msg}")
+
         blesser_user_key = self.carma.conditional_emplace(
             chat_id=chat_id,
             username=blesser_username,
@@ -228,4 +245,3 @@ class Handlers:
 
         logging.info(message)
         await message.reply(reply_template)
-
