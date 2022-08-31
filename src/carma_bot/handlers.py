@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import shelve
 from typing import Union
@@ -110,6 +111,8 @@ class CarmaStorage:
 
         if now_month != self.db["current_month"]:
             assert now_month > self.db["current_month"]
+            with open(f"{now_month-1}.json", 'w') as f:
+                json.dump(self.db["last_month"], f)
             self.db["last_month"] = {}
             self.db["current_month"] = now_month
 
@@ -166,11 +169,12 @@ class Handlers:
 
         now_month = datetime.datetime.utcnow().month
         if now_month != self.carma.db["current_month"]:
-            kir_chat = -1001672737552
-            month_msg = self.carma.formatted_list_month(kir_chat)
-            if len(month_msg) > 4000:
-                month_msg = month_msg[:4000] + '...'
-            await self.bot.send_message(kir_chat, f"Статистика за месяц:\n\n{month_msg}")
+            kir_chats = [-1001672737552, -1001596230013]
+            for kir_chat in kir_chats:
+                month_msg = self.carma.formatted_list_month(kir_chat)
+                if len(month_msg) > 4000:
+                    month_msg = month_msg[:4000] + '...'
+                await self.bot.send_message(kir_chat, f"Статистика за месяц:\n\n{month_msg}")
 
         if benefitiar_id == blesser_id:
             await message.reply(
