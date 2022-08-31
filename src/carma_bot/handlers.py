@@ -172,6 +172,7 @@ class Handlers:
             kir_chats = [-1001672737552, -1001596230013]
             for kir_chat in kir_chats:
                 month_msg = self.carma.formatted_list_month(kir_chat)
+                logging.info(month_msg)
                 if len(month_msg) > 4000:
                     month_msg = month_msg[:4000] + '...'
                 await self.bot.send_message(kir_chat, f"Статистика за месяц:\n\n{month_msg}")
@@ -217,11 +218,13 @@ class Handlers:
 
         now_month = datetime.datetime.utcnow().month
         if now_month != self.carma.db["current_month"]:
-            kir_chat = -1001672737552
-            month_msg = self.carma.formatted_list_month(kir_chat)
-            if len(month_msg) > 4000:
-                month_msg = month_msg[:4000] + '...'
-            await self.bot.send_message(kir_chat, f"Статистика за месяц:\n\n{month_msg}")
+            kir_chats = [-1001672737552, -1001596230013]
+            for kir_chat in kir_chats:
+                month_msg = self.carma.formatted_list_month(kir_chat)
+                logging.info(month_msg)
+                if len(month_msg) > 4000:
+                    month_msg = month_msg[:4000] + '...'
+                await self.bot.send_message(kir_chat, f"Статистика за месяц:\n\n{month_msg}")
 
         blesser_user_key = self.carma.conditional_emplace(
             chat_id=chat_id,
