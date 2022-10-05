@@ -200,7 +200,11 @@ class Handlers:
         if benefitiar_id == self.bot.id:
             reply_template += "\n\nХорошее слово и боту приятно❤"
         logging.info(message)
-        await message.reply(reply_template)
+        try:
+            await message.reply(reply_template)
+        except aiogram.utils.exceptions.BadRequest:
+            pass
+
 
     async def chat_mentions_handler(self, message: types.Message):
         if not (mentioned_users := self.parse_mentions(message.text)):
