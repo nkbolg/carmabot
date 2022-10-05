@@ -1,5 +1,5 @@
 import datetime
-import json
+import pickle
 import logging
 import shelve
 from typing import Union
@@ -111,8 +111,8 @@ class CarmaStorage:
 
         if now_month != self.db["current_month"]:
             assert now_month > self.db["current_month"]
-            with open(f"{now_month-1}.json", 'w') as f:
-                json.dump(self.db["last_month"], f)
+            with open(f"{now_month-1}.pickle", 'w') as f:
+                pickle.dump(self.db["last_month"], f)
             self.db["last_month"] = {}
             self.db["current_month"] = now_month
 
