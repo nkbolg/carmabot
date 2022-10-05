@@ -111,7 +111,7 @@ class CarmaStorage:
 
         if now_month != self.db["current_month"]:
             assert now_month > self.db["current_month"]
-            with open(f"{now_month-1}.pickle", 'w') as f:
+            with open(f"{now_month-1}.pickle", 'wb') as f:
                 pickle.dump(self.db["last_month"], f)
             self.db["last_month"] = {}
             self.db["current_month"] = now_month
