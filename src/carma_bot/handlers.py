@@ -63,15 +63,18 @@ class CarmaStorage:
         username_key = username, chat_id
         userid_key = user_id, chat_id
 
-        # if mentioned by username earlier but not mentioned by user_id
-        if username is not None and user_id is not None:
-            if username_key in self.db["all"] and userid_key not in self.db["all"]:
-                assert name is not None
-                self.db["all"][username_key].name = name
-                self.db["last_month"][username_key].name = name
-                self.db["all"][userid_key] = self.db["all"][username_key]
-                self.db["last_month"][userid_key] = self.db["last_month"][username_key]
-                return
+        try:
+            # if mentioned by username earlier but not mentioned by user_id
+            if username is not None and user_id is not None:
+                if username_key in self.db["all"] and userid_key not in self.db["all"]:
+                    assert name is not None
+                    self.db["all"][username_key].name = name
+                    self.db["last_month"][username_key].name = name
+                    self.db["all"][userid_key] = self.db["all"][username_key]
+                    self.db["last_month"][userid_key] = self.db["last_month"][username_key]
+                    return
+        except KeyError:
+            pass
 
         user_all = User(username, name)
         user_month = User(username, name)
