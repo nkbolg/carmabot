@@ -1,6 +1,6 @@
 import datetime
-import pickle
 import logging
+import pickle
 import shelve
 from typing import Union
 from dataclasses import dataclass
@@ -27,7 +27,7 @@ class User:
 
 
 class CarmaStorage:
-    def __init__(self, filename):
+    def __init__(self, filename) -> None:
         self.filename = filename
         self.db = shelve.DbfilenameShelf(self.filename, writeback=True)
         if not self.db:
@@ -72,7 +72,7 @@ class CarmaStorage:
                     self.db["last_month"][username_key].name = name
                     self.db["all"][userid_key] = self.db["all"][username_key]
                     self.db["last_month"][userid_key] = self.db["last_month"][username_key]
-                    return
+                    return None
         except KeyError:
             pass
 
@@ -100,12 +100,12 @@ class CarmaStorage:
         return self.db["all"][key]
 
     def formatted_list_all(self, chat_id: int) -> str:
-        filtered = list(set(v for k, v in self.db["all"].items() if k[1] == chat_id and v.carma != 0))
+        filtered = list({v for k, v in self.db["all"].items() if k[1] == chat_id and v.carma != 0})
         sorted_list = sorted(filtered, key=lambda x: x.carma, reverse=True)
         return "\n".join(map(str, sorted_list)) or "Пока тут пусто"
 
     def formatted_list_month(self, chat_id: int):
-        filtered = list(set(v for k, v in self.db["last_month"].items() if k[1] == chat_id and v.carma != 0))
+        filtered = list({v for k, v in self.db["last_month"].items() if k[1] == chat_id and v.carma != 0})
         sorted_list = sorted(filtered, key=lambda x: x.carma, reverse=True)
         return "\n".join(map(str, sorted_list)) or "Пока тут пусто"
 
@@ -124,7 +124,7 @@ class CarmaStorage:
 
 
 class Handlers:
-    def __init__(self, bot: aiogram.Bot, target_phrases):
+    def __init__(self, bot: aiogram.Bot, target_phrases) -> None:
         self.bot = bot
         self.target_phrases = target_phrases
         self.carma = CarmaStorage(filename="carma_storage")
@@ -146,10 +146,7 @@ class Handlers:
     @staticmethod
     def _acceptable(target_phrases, text: str):
         lowered = text.lower()
-        for phr in target_phrases:
-            if phr in lowered:
-                return True
-        return False
+        return any(phr in lowered for phr in target_phrases)
 
     @staticmethod
     def parse_mentions(text: str) -> list[str]:

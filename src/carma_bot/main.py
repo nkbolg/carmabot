@@ -7,8 +7,7 @@ from carma_bot.config import get_config
 
 
 def main():
-    """Точка входа в приложение"""
-
+    """Точка входа в приложение."""
     # включение логирования
     logging.basicConfig(
         level=logging.INFO,
