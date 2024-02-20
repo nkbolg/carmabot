@@ -1,6 +1,6 @@
 import datetime
-import logging
 import pickle
+import logging
 import shelve
 from typing import Union
 from dataclasses import dataclass
@@ -72,7 +72,7 @@ class CarmaStorage:
                     self.db["last_month"][username_key].name = name
                     self.db["all"][userid_key] = self.db["all"][username_key]
                     self.db["last_month"][userid_key] = self.db["last_month"][username_key]
-                    return None
+                    return
         except KeyError:
             pass
 
@@ -169,7 +169,7 @@ class Handlers:
 
         now_month = datetime.datetime.utcnow().month
         if now_month != self.carma.db["current_month"]:
-            kir_chats = [-1001672737552, -1001596230013]
+            kir_chats = [-100600741090]
             for kir_chat in kir_chats:
                 month_msg = self.carma.formatted_list_month(kir_chat)
                 logging.info(month_msg)

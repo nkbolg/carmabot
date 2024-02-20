@@ -9,7 +9,7 @@ from carma_bot.handlers import Handlers
 
 
 def create_dispatcher(conf: config.Config):
-    """Создание и настройка поведения бота."""
+    """Создание и настройка поведения бота"""
     loop = asyncio.get_event_loop()
     bot = aiogram.Bot(conf.bot_token, loop)
     dispatcher = aiogram.Dispatcher(bot, loop)
@@ -20,7 +20,7 @@ def create_dispatcher(conf: config.Config):
 
 
 def setup_handlers(dispatcher: aiogram.Dispatcher):
-    """Привязка обработчиков к командам получаемым ботом."""
+    """Привязка обработчиков к командам получаемым ботом"""
     target = [
         "спс",
         "спасибо",
