@@ -20,12 +20,12 @@ async def start_handler(message: types.Message, phrases: list[str]):
     await message.reply(reply_text, reply=False)
 
 
-@router.message(Command("/statsmonth"))
+@router.message(Command("statsmonth"))
 async def month_statistics_handler(message: types.Message, carma_storage: CarmaStorage):
     await message.reply(carma_storage.formatted_list_month(message.chat.id))
 
 
-@router.message(Command("/stats"))
+@router.message(Command("stats"))
 async def all_statistics_handler(message: types.Message, carma_storage: CarmaStorage):
     await message.reply(carma_storage.formatted_list_all(message.chat.id))
 
