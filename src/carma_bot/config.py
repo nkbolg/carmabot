@@ -1,21 +1,11 @@
-import os
-from dataclasses import dataclass
-
-from dotenv import load_dotenv
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings
 
 
-@dataclass(frozen=True)
-class Config:
-    bot_token: str
+class Settings(BaseSettings):
+    bot_token: SecretStr
+    target_chats: list[int]
 
-
-def get_config():
-    """Получение конфигурации из переменных среды или .env файла"""
-
-    # загрузка переменных среды из .env-файла при его наличии
-    load_dotenv()
-
-    # чтение данных из переменных среды
-    token = os.environ["BOT_TOKEN"]
-
-    return Config(token)
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
